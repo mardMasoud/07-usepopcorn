@@ -43,14 +43,8 @@ const tempWatchedData = [
 ];
 
 const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
-function Navbar({movies}) {
-    return (
-        <nav className="nav-bar">
-            <Logo />
-            <Search />
-            <NumRersults movies={movies} />
-        </nav>
-    );
+function Navbar({ children }) {
+    return <nav className="nav-bar">{children}</nav>;
 }
 function Logo() {
     return (
@@ -72,14 +66,14 @@ function Search() {
         />
     );
 }
-function NumRersults({movies}) {
+function NumRersults({ movies }) {
     return (
         <p className="num-results">
             Found <strong>{movies.length}</strong> results
         </p>
     );
 }
-function Movie({ movie  }) {
+function Movie({ movie }) {
     return (
         <li>
             <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -93,8 +87,7 @@ function Movie({ movie  }) {
         </li>
     );
 }
-function MovieList({movies}) {
-   
+function MovieList({ movies }) {
     return (
         <ul className="list">
             {movies.map((movie) => (
@@ -103,7 +96,7 @@ function MovieList({movies}) {
         </ul>
     );
 }
-function ListBox({movies}) {
+function ListBox({children}) {
     const [isOpen1, setIsOpen1] = useState(true);
 
     return (
@@ -111,7 +104,7 @@ function ListBox({movies}) {
             <button className="btn-toggle" onClick={() => setIsOpen1((open) => !open)}>
                 {isOpen1 ? "–" : "+"}
             </button>
-            {isOpen1 && <MovieList movies={movies}/>}
+            {isOpen1 && children }
         </div>
     );
 }
@@ -143,31 +136,33 @@ function WatchedSummry({ watched }) {
         </div>
     );
 }
-function WatchedMovie({movie}){
-  return(<li >
-    <img src={movie.Poster} alt={`${movie.Title} poster`} />
-    <h3>{movie.Title}</h3>
-    <div>
-        <p>
-            <span>⭐️</span>
-            <span>{movie.imdbRating}</span>
-        </p>
-        <p>
-            <span>🌟</span>
-            <span>{movie.userRating}</span>
-        </p>
-        <p>
-            <span>⏳</span>
-            <span>{movie.runtime} min</span>
-        </p>
-    </div>
-</li>)
+function WatchedMovie({ movie }) {
+    return (
+        <li>
+            <img src={movie.Poster} alt={`${movie.Title} poster`} />
+            <h3>{movie.Title}</h3>
+            <div>
+                <p>
+                    <span>⭐️</span>
+                    <span>{movie.imdbRating}</span>
+                </p>
+                <p>
+                    <span>🌟</span>
+                    <span>{movie.userRating}</span>
+                </p>
+                <p>
+                    <span>⏳</span>
+                    <span>{movie.runtime} min</span>
+                </p>
+            </div>
+        </li>
+    );
 }
-function WatchedMovieList({watched}) {
+function WatchedMovieList({ watched }) {
     return (
         <ul className="list">
             {watched.map((movie) => (
-                <WatchedMovie movie={movie} key={movie.imdbID}/>
+                <WatchedMovie movie={movie} key={movie.imdbID} />
             ))}
         </ul>
     );
@@ -187,26 +182,30 @@ function WatchedBox() {
                 <>
                     <WatchedSummry watched={watched} />
 
-                    <WatchedMovieList watched={watched}/>
+                    <WatchedMovieList watched={watched} />
                 </>
             )}
         </div>
     );
 }
-function Main({movies}) {
-    return (
-        <main className="main">
-            <ListBox movies={movies}/>
-            <WatchedBox />
-        </main>
-    );
+function Main({ children }) {
+    return <main className="main">{children}</main>;
 }
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
+    const [movies, setMovies] = useState(tempMovieData);
     return (
         <>
-            <Navbar movies={movies} />
-            <Main movies={movies} />
+            <Navbar>
+                <Logo />
+                <Search />
+                <NumRersults movies={movies} />
+            </Navbar>
+            <Main>
+                <ListBox>
+                <MovieList movies={movies}/>
+                </ListBox>
+                <WatchedBox />
+            </Main>
         </>
     );
 }
