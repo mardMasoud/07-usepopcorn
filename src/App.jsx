@@ -79,7 +79,7 @@ function NumRersults({movies}) {
         </p>
     );
 }
-function Movie({ movie }) {
+function Movie({ movie  }) {
     return (
         <li>
             <img src={movie.Poster} alt={`${movie.Title} poster`} />
