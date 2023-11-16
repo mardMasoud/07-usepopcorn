@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const tempMovieData = [
     {
@@ -198,9 +198,44 @@ function WatchedMovieList({ watched }) {
 function Main({ children }) {
     return <main className="main">{children}</main>;
 }
+function Loading() {
+    return <p className="loader">Loading...</p>;
+}
+function ErrShow({ err }) {
+    return (
+        <p className="error">
+            <span>⛔</span>
+            {err}
+        </p>
+    );
+}
+const KEY = "f84fc31d";
 export default function App() {
-    const [movies, setMovies] = useState(tempMovieData);
+    const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState(tempWatchedData);
+    const [isLoading, setIsloading] = useState(false);
+    const [isErr, setIsErr] = useState("");
+    useEffect(function () {
+        async function getData() {
+            setIsloading(true);
+            try {
+                const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=love`);
+                const data = await res.json();
+                if (!res.ok) throw new Error("اینترنت قطع است ");
+                if (data.Response==='False') {
+                    throw new Error("Movie not found!");
+                }
+                setMovies(data.Search);
+            } catch (error) {
+                console.log(error.message);
+                setIsErr(error.message);
+            } finally {
+                setIsloading(false);
+            }
+        }
+        getData();
+    }, []);
+
     return (
         <>
             <Navbar>
@@ -208,13 +243,15 @@ export default function App() {
             </Navbar>
             <Main>
                 <Box>
-                    <MovieList movies={movies} />
+                    {/* {isLoading ? <Loading /> : <MovieList movies={movies} />} */}
+                    {isLoading && <Loading />}
+                    {!isLoading && !isErr && <MovieList movies={movies} />}
+                    {isErr && <ErrShow err={isErr} />}
                 </Box>
                 <Box>
                     <WatchedSummry watched={watched} />
                     <WatchedMovieList watched={watched} />
                 </Box>
-             
             </Main>
         </>
     );

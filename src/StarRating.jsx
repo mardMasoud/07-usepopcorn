@@ -11,29 +11,25 @@ const styleStar = {
 
     gap: "4px",
 };
-const textStyle = {
-    lineHeight: "1",
-    margin: "0",
-};
-const star = {
-    display: "block",
-};
+
 import { useState } from "react";
-function StarRating({ maxRating = 5 }) {
+function StarRating({ maxRating = 5, color = "#fcc419", size = 30 }) {
+    const textStyle = {
+        lineHeight: "1",
+        margin: "0",
+        color,
+        fontSize: `${size / 1.5}px`,
+    };
     const [rating, setRating] = useState(0);
     const [tempRating, setTempRating] = useState(0);
     function handleHoverEnter(ix) {
-         setRating(ix + 1);
+        setRating(ix + 1);
     }
     function handleHoverLeave() {
-        
-       setRating(tempRating)
+        setRating(tempRating);
     }
     function handleClick(ix) {
-      
-   setTempRating(ix+1)
-          
-       
+        setTempRating(ix + 1);
     }
     return (
         <div style={container}>
@@ -54,7 +50,12 @@ function StarRating({ maxRating = 5 }) {
     );
 }
 
-function Star({ onClick, full, onHoverEnter, onHoverLeave }) {
+function Star({ onClick, full, onHoverEnter, onHoverLeave, color, size }) {
+    const star = {
+        display: "block",
+        color,
+        fontSize: `${size / 1.5}px`,
+    };
     return (
         <span
             style={star}
@@ -63,12 +64,17 @@ function Star({ onClick, full, onHoverEnter, onHoverLeave }) {
             onMouseLeave={onHoverLeave}
         >
             {full ? (
-                <img
-                    width="50"
-                    height="50"
-                    src="https://img.icons8.com/ios-filled/50/star--v1.png"
-                    alt="star--v1"
-                />
+               <svg
+               xmlns="http://www.w3.org/2000/svg"
+               
+               width="50"
+               height="50"
+               viewBox="0 0 172 172"
+               style=" fill:#26e07f;"
+           >
+              
+           </svg>
+           
             ) : (
                 <img
                     width="50"
@@ -81,3 +87,4 @@ function Star({ onClick, full, onHoverEnter, onHoverLeave }) {
     );
 }
 export default StarRating;
+
