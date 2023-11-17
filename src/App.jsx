@@ -84,9 +84,9 @@ function NumRersults({ movies }) {
     </p>
   );
 }
-function Movie({ movie }) {
+function Movie({ movie, handleSelectedId }) {
   return (
-    <li>
+    <li onClick={() => handleSelectedId(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -98,11 +98,15 @@ function Movie({ movie }) {
     </li>
   );
 }
-function MovieList({ movies }) {
+function MovieList({ movies, handleSelectedId }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie
+          movie={movie}
+          key={movie.imdbID}
+          handleSelectedId={handleSelectedId}
+        />
       ))}
     </ul>
   );
@@ -197,12 +201,16 @@ function ErrShow({ err }) {
   );
 }
 const KEY = "f84fc31d";
+function DetaileFilm({ idSelect }) {
+  return <div className="detaile">{idSelect}</div>;
+}
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsloading] = useState(false);
   const [isErr, setIsErr] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("love");
+  const [selectedId, setSelectedId] = useState(null);
   const tempQuery = "Interstellar";
   useEffect(
     function () {
@@ -235,7 +243,9 @@ export default function App() {
     },
     [query]
   );
-
+  function handleSelectedId(id) {
+    setSelectedId(id);
+  }
   return (
     <>
       <Navbar>
@@ -244,14 +254,21 @@ export default function App() {
       </Navbar>
       <Main>
         <Box>
-          {/* {isLoading ? <Loading /> : <MovieList movies={movies} />} */}
           {isLoading && <Loading />}
-          {!isLoading && !isErr && <MovieList movies={movies} />}
+          {!isLoading && !isErr && (
+            <MovieList movies={movies} handleSelectedId={handleSelectedId} />
+          )}
           {isErr && <ErrShow err={isErr} />}
         </Box>
         <Box>
-          <WatchedSummry watched={watched} />
-          <WatchedMovieList watched={watched} />
+          {selectedId ? (
+            <DetaileFilm idSelect={selectedId} />
+          ) : (
+            <>
+              <WatchedSummry watched={watched} />
+              <WatchedMovieList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
