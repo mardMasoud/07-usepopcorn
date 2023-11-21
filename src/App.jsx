@@ -1,48 +1,6 @@
 import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
 
-const tempMovieData = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt0133093",
-        Title: "The Matrix",
-        Year: "1999",
-        Poster: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt6751668",
-        Title: "Parasite",
-        Year: "2019",
-        Poster: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-    },
-];
-
-const tempWatchedData = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-        runtime: 148,
-        imdbRating: 8.8,
-        userRating: 10,
-    },
-    {
-        imdbID: "tt0088763",
-        Title: "Back to the Future",
-        Year: "1985",
-        Poster: "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-        runtime: 116,
-        imdbRating: 8.5,
-        userRating: 9,
-    },
-];
-
 const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 function Navbar({ children }) {
     return (
@@ -104,7 +62,6 @@ function MovieList({ movies, handleSelectedId }) {
 }
 function Box({ children }) {
     const [isOpen, setIsOpen1] = useState(true);
-
     return (
         <div className="box">
             <button className="btn-toggle" onClick={() => setIsOpen1((open) => !open)}>
@@ -145,8 +102,8 @@ function WatchedSummry({ watched }) {
 function WatchedMovie({ movie }) {
     return (
         <li>
-            <img src={movie.Poster} alt={`${movie.Title} poster`} />
-            <h3>{movie.Title}</h3>
+            <img src={movie.poster} alt={`${movie.title} poster`} />
+            <h3>{movie.title}</h3>
             <div>
                 <p>
                     <span>⭐️</span>
@@ -168,7 +125,7 @@ function WatchedMovieList({ watched }) {
     return (
         <ul className="list">
             {watched.map((movie) => (
-                <WatchedMovie movie={movie} key={movie.imdbID} />
+                <WatchedMovie movie={movie} key={movie.idImdb} />
             ))}
         </ul>
     );
@@ -188,27 +145,52 @@ function ErrShow({ err }) {
         </p>
     );
 }
-const KEY = "f84fc31d";
+const KEY = "c931f431";
 
-function DetaileFilm({ idSelect, handleBackClick }) {
+function DetaileFilm({ idSelect, handleBackClick, onAddWatchedMovie, watched }) {
     const [movie, setMovie] = useState({});
+
+    const [userRating, setUserRating] = useState("");
+
     useEffect(
         function () {
-            async function getMovie(id) {
-                console.log(id);
-                const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${id}`);
+            async function getMovie() {
+                const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${idSelect}`);
                 const data = await res.json();
 
                 setMovie(data);
             }
-            getMovie(idSelect);
+            getMovie();
         },
         [idSelect]
     );
-    console.log(movie);
+  
+    function handleAdded() {
+      const newMovie = {
+            idImdb: idSelect,
+            title: movie.Title,
+            poster: movie.Poster,
+            runtime: Number(movie.Runtime.split(" ").at(0)),
+            imdbRating: Number(movie.imdbRating),
+            userRating,
+            rated:userRating
+        };
+       
+        if (watched.length === 0) {
+            onAddWatchedMovie(newMovie);
+            handleBackClick();
+        } else if (watched.length > 0 && watched.some((item) => item.idImdb === newMovie.idImdb)){
+            handleBackClick();
+        }
+           
+        else if (watched.length > 0) {
+            onAddWatchedMovie(newMovie);
+            handleBackClick();
+        }
+    }
+
     return (
         <div className="details">
-            
             <header>
                 <button className="btn-back" onClick={handleBackClick}>
                     &larr;
@@ -226,8 +208,20 @@ function DetaileFilm({ idSelect, handleBackClick }) {
                     </p>
                 </div>
             </header>
-            
+
             <section>
+                <div className="rating">
+                    {console.log(watched[0])}
+                   {watched.rated>0 ? watched.userRating : <StarRating onSetRating={setUserRating} />}
+                       
+                  
+                </div>
+                {userRating > 0 && (
+                    <button className="btn-add" onClick={handleAdded}>
+                        + Add to List
+                    </button>
+                )}
+
                 <p>
                     <em>{movie.Plot}</em>
                 </p>
@@ -239,12 +233,17 @@ function DetaileFilm({ idSelect, handleBackClick }) {
 }
 export default function App() {
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState(tempWatchedData);
+    const [watched, setWatched] = useState([]);
     const [isLoading, setIsloading] = useState(false);
     const [isErr, setIsErr] = useState("");
-    const [query, setQuery] = useState("love");
+    const [query, setQuery] = useState("shine");
     const [selectedId, setSelectedId] = useState(null);
     const tempQuery = "Interstellar";
+
+    function handleAddWatch(movie) {
+        setWatched((watched) => [...watched, movie]);
+    }
+
     useEffect(
         function () {
             async function getData() {
@@ -274,12 +273,7 @@ export default function App() {
         },
         [query]
     );
-    // useEffect(function(){
-    //     async function fetchMovie(){
 
-    //         fetch()
-    //     }
-    // })
     function handleSelectedId(id) {
         setSelectedId((selectedId) => (selectedId === id ? null : id));
     }
@@ -306,6 +300,8 @@ export default function App() {
                             idSelect={selectedId}
                             movies1={movies}
                             handleBackClick={handleBackClick}
+                            onAddWatchedMovie={handleAddWatch}
+                            watched={watched}
                         />
                     ) : (
                         <>
