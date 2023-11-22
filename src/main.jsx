@@ -5,10 +5,9 @@ import App from './App.jsx'
  import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-   <App/>
+ <><App/></>
+   
     
-    {/* <StarRating size={30}/>
-    <StarRating size={30} color='red'/> */}
-  </React.StrictMode>
+   
+
 )

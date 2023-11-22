@@ -99,7 +99,7 @@ function WatchedSummry({ watched }) {
         </div>
     );
 }
-function WatchedMovie({ movie }) {
+function WatchedMovie({ movie ,handleDelete}) {
     return (
         <li>
             <img src={movie.poster} alt={`${movie.title} poster`} />
@@ -117,15 +117,22 @@ function WatchedMovie({ movie }) {
                     <span>⏳</span>
                     <span>{movie.runtime} min</span>
                 </p>
+                <p>
+                    <button className="btn-delete"  onClick={()=>handleDelete(movie.idImdb)}>X</button>
+                {/* <span>   </span>
+                    <span role="button" onClick={()=>handleDelete(movie.idImdb)}>
+                        ❌
+                    </span> */}
+                </p>
             </div>
         </li>
     );
 }
-function WatchedMovieList({ watched }) {
+function WatchedMovieList({ watched,handleDelete }) {
     return (
         <ul className="list">
             {watched.map((movie) => (
-                <WatchedMovie movie={movie} key={movie.idImdb} />
+                <WatchedMovie movie={movie} key={movie.idImdb} handleDelete={handleDelete} />
             ))}
         </ul>
     );
@@ -164,30 +171,25 @@ function DetaileFilm({ idSelect, handleBackClick, onAddWatchedMovie, watched }) 
         },
         [idSelect]
     );
-  
+
     function handleAdded() {
-      const newMovie = {
+        const newMovie = {
             idImdb: idSelect,
             title: movie.Title,
             poster: movie.Poster,
             runtime: Number(movie.Runtime.split(" ").at(0)),
             imdbRating: Number(movie.imdbRating),
             userRating,
-            rated:userRating
         };
-       
-        if (watched.length === 0) {
-            onAddWatchedMovie(newMovie);
-            handleBackClick();
-        } else if (watched.length > 0 && watched.some((item) => item.idImdb === newMovie.idImdb)){
-            handleBackClick();
-        }
-           
-        else if (watched.length > 0) {
+
+        if (watched.length === 0 || watched.length > 0) {
             onAddWatchedMovie(newMovie);
             handleBackClick();
         }
+        if (watched.length > 0 && watched.some((item) => item.idImdb === movie.idImdb))
+            handleBackClick();
     }
+    const Indx = watched.findIndex((item) => item.idImdb === idSelect);
 
     return (
         <div className="details">
@@ -211,10 +213,14 @@ function DetaileFilm({ idSelect, handleBackClick, onAddWatchedMovie, watched }) 
 
             <section>
                 <div className="rating">
-                    {console.log(watched[0])}
-                   {watched.rated>0 ? watched.userRating : <StarRating onSetRating={setUserRating} />}
-                       
-                  
+                    {watched.some((item) => item.idImdb === idSelect) ? (
+                        <p>
+                            you rated in movie: {watched[Indx].userRating}
+                            <span>⭐</span>
+                        </p>
+                    ) : (
+                        <StarRating onSetRating={setUserRating} />
+                    )}
                 </div>
                 {userRating > 0 && (
                     <button className="btn-add" onClick={handleAdded}>
@@ -280,6 +286,9 @@ export default function App() {
     function handleBackClick() {
         setSelectedId(null);
     }
+    function handleDelete(id){
+        setWatched(watched=>watched.filter(item=>item.idImdb!==id))
+    }
     return (
         <>
             <Navbar>
@@ -306,7 +315,7 @@ export default function App() {
                     ) : (
                         <>
                             <WatchedSummry watched={watched} />
-                            <WatchedMovieList watched={watched} />
+                            <WatchedMovieList watched={watched} handleDelete={handleDelete} />
                         </>
                     )}
                 </Box>
