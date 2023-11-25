@@ -119,10 +119,7 @@ function WatchedMovie({ movie ,handleDelete}) {
                 </p>
                 <p>
                     <button className="btn-delete"  onClick={()=>handleDelete(movie.idImdb)}>X</button>
-                {/* <span>   </span>
-                    <span role="button" onClick={()=>handleDelete(movie.idImdb)}>
-                        ❌
-                    </span> */}
+               
                 </p>
             </div>
         </li>
@@ -190,7 +187,9 @@ function DetaileFilm({ idSelect, handleBackClick, onAddWatchedMovie, watched }) 
             handleBackClick();
     }
     const Indx = watched.findIndex((item) => item.idImdb === idSelect);
-
+    useEffect(function(){
+        document.title=`Movie | ${movie.Title}`
+        },[idSelect])
     return (
         <div className="details">
             <header>
