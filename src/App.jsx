@@ -99,7 +99,7 @@ function WatchedSummry({ watched }) {
         </div>
     );
 }
-function WatchedMovie({ movie ,handleDelete}) {
+function WatchedMovie({ movie, handleDelete }) {
     return (
         <li>
             <img src={movie.poster} alt={`${movie.title} poster`} />
@@ -118,14 +118,15 @@ function WatchedMovie({ movie ,handleDelete}) {
                     <span>{movie.runtime} min</span>
                 </p>
                 <p>
-                    <button className="btn-delete"  onClick={()=>handleDelete(movie.idImdb)}>X</button>
-               
+                    <button className="btn-delete" onClick={() => handleDelete(movie.idImdb)}>
+                        X
+                    </button>
                 </p>
             </div>
         </li>
     );
 }
-function WatchedMovieList({ watched,handleDelete }) {
+function WatchedMovieList({ watched, handleDelete }) {
     return (
         <ul className="list">
             {watched.map((movie) => (
@@ -187,9 +188,15 @@ function DetaileFilm({ idSelect, handleBackClick, onAddWatchedMovie, watched }) 
             handleBackClick();
     }
     const Indx = watched.findIndex((item) => item.idImdb === idSelect);
-    useEffect(function(){
-        document.title=`Movie | ${movie.Title}`
-        },[idSelect])
+    useEffect(
+        function () {
+            document.title = `Movie | ${movie.Title}`;
+            return function () {
+                document.title = `usePopcorn`;
+            };
+        },
+        [movie]
+    );
     return (
         <div className="details">
             <header>
@@ -241,7 +248,7 @@ export default function App() {
     const [watched, setWatched] = useState([]);
     const [isLoading, setIsloading] = useState(false);
     const [isErr, setIsErr] = useState("");
-    const [query, setQuery] = useState("shine");
+    const [query, setQuery] = useState("");
     const [selectedId, setSelectedId] = useState(null);
     const tempQuery = "Interstellar";
 
@@ -251,20 +258,23 @@ export default function App() {
 
     useEffect(
         function () {
+            const controller = new AbortController();
             async function getData() {
                 setIsErr("");
                 setIsloading(true);
                 try {
-                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`, {
+                        signal: controller.signal,
+                    });
                     const data = await res.json();
                     if (!res.ok) throw new Error("اینترنت قطع است ");
                     if (data.Response === "False") {
                         throw new Error("Movie not found!");
                     }
                     setMovies(data.Search);
+                    setIsErr("");
                 } catch (error) {
-                    console.log(error.message);
-                    setIsErr(error.message);
+                    if (error != "AbortError") setIsErr(error.message);
                 } finally {
                     setIsloading(false);
                 }
@@ -275,6 +285,10 @@ export default function App() {
                 return;
             }
             getData();
+            return function () {
+                controller.abort();
+                console.log("ghfgh");
+            };
         },
         [query]
     );
@@ -285,8 +299,8 @@ export default function App() {
     function handleBackClick() {
         setSelectedId(null);
     }
-    function handleDelete(id){
-        setWatched(watched=>watched.filter(item=>item.idImdb!==id))
+    function handleDelete(id) {
+        setWatched((watched) => watched.filter((item) => item.idImdb !== id));
     }
     return (
         <>
